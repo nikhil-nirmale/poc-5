@@ -1,11 +1,17 @@
-# Ignore all hidden files starting with #
-.*
-!/.dockerignore
-!/.gitignore
+# Ignore everything by default
+*
 
-# Ignore editor/temp files
+# Allow these specific files/directories
+!src/
+!pom.xml
+
+# Explicitly ignore problematic patterns
 **/#*
+**/.*
+**/*~
+**/Thumbs.db
+**/.DS_Store
 **/.git
 **/.github
-*.swp
-*.tmp
+**/*.swp
+**/*.tmp
