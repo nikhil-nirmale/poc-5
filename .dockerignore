@@ -1,0 +1,11 @@
+# Ignore all hidden files starting with #
+.*
+!/.dockerignore
+!/.gitignore
+
+# Ignore editor/temp files
+**/#*
+**/.git
+**/.github
+*.swp
+*.tmp
