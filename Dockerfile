@@ -1,18 +1,22 @@
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+# Use official Python base image
+FROM python:3.11-slim
 
+# Set working directory
 WORKDIR /app
 
-# First copy ONLY pom.xml (helps layer caching)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Copy only requirements first if you have them (for layer caching)
+# If no requirements.txt, skip this part or install manually below
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
 
-# Then copy src (separate step to debug)
-COPY src ./src
-RUN ls -laR src/  # Debug: List all files
+# Copy your Python files into the container
+COPY main.py .
 
-RUN mvn clean package -DskipTests
+# Install Flask (add other dependencies if needed)
+RUN pip install --no-cache-dir Flask
 
-FROM eclipse-temurin:17-jdk-jammy
-COPY --from=build /app/target/*.jar app.jar
+# Expose the port your app runs on
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Start the Flask app
+CMD ["python", "main.py"]
