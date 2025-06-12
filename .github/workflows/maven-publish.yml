@@ -1,54 +1,42 @@
-# Name of the GitHub Actions workflow shown in GitHub UI
-name: Java CI with Maven - POC
+name: Python CI/CD - Flask App
 
-# Define triggers: run on push or PR to 'main' branch
 on:
   push:
-    branches: [ "main" ]  # Trigger on push to main branch
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]  # Trigger on pull requests to main
+    branches: [ "main" ]
 
 jobs:
-  build-and-push-poc:  # Unique job ID
-    runs-on: ubuntu-latest  # GitHub-hosted runner environment
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout your repo code
-      - name: Checkout code - POC
-        uses: actions/checkout@v4  # Uses GitHub’s official action to clone your repo
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      # Step 2: Set up Java 17 for Maven build
-      - name: Set up JDK 17 - POC
-        uses: actions/setup-java@v4  # Official Java setup action
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          java-version: '17'  # Specify Java version
-          distribution: 'temurin'  # Use Eclipse Temurin (open-source JDK)
-          cache: maven  # Enable caching of dependencies to speed up builds
+          python-version: '3.10'
 
-      # Step 3: Build Java project using Maven
-      - name: Build with Maven - POC
-        run:  mvn clean --file pom.xml  # -B = batch mode (no prompts), builds with pom.xml
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flask
 
-      # Step 4: Authenticate GitHub Actions with your GCP account
-      - name: Authenticate with GCP - POC
+      - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'  # Uses GCP service account key stored as secret
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-      # Step 5: Configure Docker to push to GCP Artifact Registry
-      - name: Configure Docker for Artifact Registry - POC
+      - name: Configure Docker for Artifact Registry
         run: |
-          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet  # Auth Docker with Artifact Registry
+          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
 
-      # Step 6: Build Docker image using Dockerfile in your repo
-      - name: Build Docker Image - POC
+      - name: Build Docker Image
         run: |
           docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/poc-1:latest .
-  
-          # Builds image and tags it with Artifact Registry path
 
-      # Step 7: Push the Docker image to GCP Artifact Registry
-      - name: Push Docker Image - POC
+      - name: Push Docker Image
         run: |
           docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/poc-1:latest
-          # Pushes built image to the Artifact Registry
